@@ -17,42 +17,38 @@ struct RecipeResult: Codable {
 @MainActor
 class GeminiService {
   private let model: GenerativeModel
+  private static let jsonRegex = try? NSRegularExpression(pattern: "\\{[\\s\\S]*\\}")
 
   init() {
-    model = GenerativeModel(
-      name: "gemini-2.0-flash",
-      apiKey: APIKey.gemini
-    )
+    guard let apiKey = Bundle.main.infoDictionary?["GEMINI_API_KEY"] as? String else {
+      fatalError("GEMINI_API_KEY를 Info.plist에 설정해주세요")
+    }
+    model = GenerativeModel(name: "gemini-2.0-flash", apiKey: apiKey)
   }
 
   func analyzeFood(image: UIImage) async throws -> RecipeResult {
-    guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+    guard let imageData = image.jpegData(compressionQuality: 0.75) else {
+      throw RecipeError.invalidImage
+    }
+    guard imageData.count > 0 else {
       throw RecipeError.invalidImage
     }
 
-    let base64Image = imageData.base64EncodedString()
-
     let prompt = """
-    이 음식 사진을 분석해서 정확히 다음 JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
+    이 이미지를 분석해서 정확히 다음 JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
     {
-      "foodName": "음식 이름",
+      "foodName": "음식/음료/차 이름",
       "ingredients": [{"name": "재료명", "amount": "분량"}],
-      "steps": ["단계1", "단계2"],
-      "tips": "조리 팁 또는 null"
+      "steps": ["만드는 단계1", "만드는 단계2"],
+      "tips": "더 맛있게 만드는 팁 또는 null"
     }
+    음식, 음료, 차, 커피, 주스, 스무디 등 모든 종류의 이미지를 분석할 수 있습니다.
     """
 
-    let content = [
-      ImageContent.init(
-        inlineData: InlineDataPart(
-          mimeType: "image/jpeg",
-          data: base64Image
-        )
-      ),
-      TextContent.init(text: prompt)
-    ]
-
-    let response = try await model.generateContent(content)
+    let response = try await model.generateContent(
+      prompt,
+      image
+    )
 
     guard let text = response.text else {
       throw RecipeError.noResponse
@@ -64,8 +60,7 @@ class GeminiService {
   }
 
   private func extractJSON(from text: String) throws -> Data {
-    let pattern = "\\{[\\s\\S]*\\}"
-    guard let regex = try? NSRegularExpression(pattern: pattern) else {
+    guard let regex = Self.jsonRegex else {
       throw RecipeError.parsingError("JSON 정규식 생성 실패")
     }
 

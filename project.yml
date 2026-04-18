@@ -4,46 +4,38 @@ options:
   bundleIdPrefix: com.hydorgen
   deploymentTarget:
     iOS: "17.0"
-  minimumXcodeGenVersion: "2.35"
-
-settings:
-  DEVELOPMENT_TEAM: MHVVU6XHCC
-  CODE_SIGN_IDENTITY: "Apple Development"
 
 targets:
   RecipeAI:
     type: application
     platform: iOS
     deploymentTarget: "17.0"
-
-    sources:
-      - path: Sources
-        excludes:
-          - "**/.*"
-
+    sources: Sources
+    dependencies:
+      - package: GoogleGenerativeAI
     settings:
-      base:
-        INFOPLIST_FILE: Sources/Info.plist
-        PRODUCT_BUNDLE_IDENTIFIER: com.hydorgen.recipeai
-        SWIFT_VERSION: "5.9"
-        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
-
+      INFOPLIST_FILE: Sources/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.hydorgen.foodrecipe
+      DEVELOPMENT_TEAM: MHVVU6XHCC
+      CODE_SIGN_IDENTITY: Apple Development
     info:
       path: Sources/Info.plist
-      uses_base_internationalization: true
       properties:
         NSCameraUsageDescription: "음식 사진 촬영을 위해 카메라가 필요합니다"
         NSPhotoLibraryUsageDescription: "음식 사진 선택을 위해 앨범 접근이 필요합니다"
-        CFBundleDisplayName: "RecipeAI"
-        CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "1"
-        UILaunchStoryboardName: ""
-        UIApplicationSceneManifest:
-          UIApplicationSupportsMultipleScenes: true
-          UISceneConfigurations:
-            UIWindowSceneSessionRoleApplication:
-              - UISceneConfigurationName: Default
-                UISceneDelegateClassName: "$(PRODUCT_MODULE_NAME).SceneDelegate"
+        GEMINI_API_KEY: "AIzaSyDtIAXdagTZ1F553xD53ASMVJaaRbFQpM0"
+
+schemes:
+  RecipeAI:
+    build:
+      targets:
+        RecipeAI: all
+    run:
+      config: Debug
+      environmentVariables:
+        - variable: GEMINI_API_KEY
+          value: $(GEMINI_API_KEY)
+          isEnabled: true
 
 packages:
   GoogleGenerativeAI:

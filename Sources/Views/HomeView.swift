@@ -1,9 +1,8 @@
 import SwiftUI
-import PhotosUI
 
 struct HomeView: View {
   @State private var selectedImage: UIImage?
-  @State private var photoItem: PhotosPickerItem?
+  @State private var showPhotoPicker = false
   @State private var showCamera = false
   @State private var isAnalyzing = false
   @State private var result: RecipeResult?
@@ -14,81 +13,125 @@ struct HomeView: View {
   private let geminiService = GeminiService()
 
   var body: some View {
-    NavigationStack {
-      VStack(spacing: 20) {
+    VStack(spacing: 20) {
         if let image = selectedImage {
           Image(uiImage: image)
             .resizable()
             .scaledToFill()
-            .frame(height: 300)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .frame(height: 320)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding()
+            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
         } else {
-          RoundedRectangle(cornerRadius: 12)
-            .fill(Color.gray.opacity(0.1))
-            .frame(height: 300)
-            .overlay(
-              VStack(spacing: 8) {
-                Image(systemName: "photo")
-                  .font(.system(size: 48))
-                  .foregroundColor(.gray)
-                Text("음식 사진을 선택하세요")
-                  .font(.headline)
-                  .foregroundColor(.gray)
-              }
+          ZStack {
+            LinearGradient(
+              gradient: Gradient(colors: [
+                Color.blue.opacity(0.1),
+                Color.purple.opacity(0.1)
+              ]),
+              startPoint: .topLeading,
+              endPoint: .bottomTrailing
             )
-            .padding()
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+
+            VStack(spacing: 16) {
+              Image(systemName: "camera.aperture")
+                .font(.system(size: 56))
+                .foregroundColor(.blue)
+
+              VStack(spacing: 8) {
+                Text("음식의 모든 비결")
+                  .font(.system(size: 20, weight: .semibold))
+                  .foregroundColor(.primary)
+
+                Text("사진 하나로 재료, 조리법, 팁까지\n한눈에 알아보세요")
+                  .font(.system(size: 14, weight: .regular))
+                  .foregroundColor(.gray)
+                  .multilineTextAlignment(.center)
+              }
+            }
+            .padding(.vertical, 32)
+          }
+          .frame(height: 320)
+          .padding()
+          .shadow(color: Color.blue.opacity(0.2), radius: 8, x: 0, y: 4)
         }
 
         HStack(spacing: 12) {
-          PhotosPicker(
-            selection: $photoItem,
-            matching: .images,
-            label: {
-              Label("갤러리", systemImage: "photo.stack")
-                .frame(maxWidth: .infinity)
+          Button(action: { showPhotoPicker = true }) {
+            HStack(spacing: 8) {
+              Image(systemName: "photo.stack.fill")
+              Text("갤러리")
             }
-          )
-          .buttonStyle(.bordered)
-          .onChange(of: photoItem) { _, newItem in
-            Task {
-              if let data = try await newItem?.loadTransferable(type: Data.self),
-                 let image = UIImage(data: data) {
-                selectedImage = image
-              }
-            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10)
           }
 
           Button(action: { showCamera = true }) {
-            Label("카메라", systemImage: "camera.fill")
-              .frame(maxWidth: .infinity)
+            HStack(spacing: 8) {
+              Image(systemName: "camera.fill")
+              Text("카메라")
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(Color.blue.opacity(0.15))
+            .foregroundColor(.blue)
+            .cornerRadius(10)
           }
-          .buttonStyle(.bordered)
         }
         .padding(.horizontal)
+        .fullScreenCover(isPresented: $showPhotoPicker) {
+          PHPickerView(selectedImage: $selectedImage)
+        }
 
         if selectedImage != nil {
           Button(action: analyzeFood) {
             if isAnalyzing {
-              ProgressView()
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
+              HStack(spacing: 8) {
+                ProgressView()
+                  .tint(.white)
+                Text("분석 중...")
+              }
+              .frame(maxWidth: .infinity)
+              .frame(height: 50)
+              .background(
+                LinearGradient(
+                  gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                  startPoint: .topLeading,
+                  endPoint: .bottomTrailing
+                )
+              )
+              .foregroundColor(.white)
+              .cornerRadius(12)
             } else {
-              Text("분석하기")
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
+              HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                Text("AI로 분석하기")
+              }
+              .font(.system(size: 16, weight: .semibold))
+              .frame(maxWidth: .infinity)
+              .frame(height: 50)
+              .background(
+                LinearGradient(
+                  gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                  startPoint: .topLeading,
+                  endPoint: .bottomTrailing
+                )
+              )
+              .foregroundColor(.white)
+              .cornerRadius(12)
             }
           }
-          .buttonStyle(.borderedProminent)
           .disabled(isAnalyzing)
           .padding(.horizontal)
         }
 
         Spacer()
       }
-      .navigationTitle("RecipeAI")
-      .sheet(isPresented: $showCamera) {
-        CameraView(image: $selectedImage)
+      .fullScreenCover(isPresented: $showCamera) {
+        ProCameraView(capturedImage: $selectedImage)
       }
       .sheet(isPresented: $showResult) {
         if let result = result {
@@ -100,8 +143,8 @@ struct HomeView: View {
       } message: { msg in
         Text(msg)
       }
-    }
   }
+
 
   private func analyzeFood() {
     guard let image = selectedImage else { return }

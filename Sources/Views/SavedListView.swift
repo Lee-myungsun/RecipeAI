@@ -3,6 +3,7 @@ import SwiftData
 
 struct SavedListView: View {
   @Query(sort: \SavedRecipe.createdAt, order: .reverse) var recipes: [SavedRecipe]
+  @Environment(\.modelContext) var modelContext
   @State private var selectedRecipe: SavedRecipe?
 
   var body: some View {
@@ -72,7 +73,7 @@ struct SavedListView: View {
   private func deleteRecipe(at offsets: IndexSet) {
     for index in offsets {
       let recipe = recipes[index]
-      ModelContext(recipes.modelContext as! ModelContext).delete(recipe)
+      modelContext.delete(recipe)
     }
   }
 }

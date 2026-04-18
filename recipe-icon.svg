@@ -1,0 +1,49 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+
+  <!-- Bowl/Plate -->
+  <g transform="translate(512, 450)">
+    <!-- Plate -->
+    <ellipse cx="0" cy="0" rx="280" ry="250" fill="#FFFFFF" opacity="0.15"/>
+    <path d="M -250 -80 Q -280 20 -200 120 Q 0 200 200 120 Q 280 20 250 -80" fill="#FFFFFF" opacity="0.2"/>
+
+    <!-- Food items -->
+    <!-- Carrot -->
+    <g transform="translate(-120, 40)">
+      <path d="M 0 -60 L 30 20 L -30 20 Z" fill="#FF9500"/>
+      <line x1="0" y1="-60" x2="-10" y2="-90" stroke="#4CAF50" stroke-width="8"/>
+      <line x1="0" y1="-60" x2="10" y2="-90" stroke="#4CAF50" stroke-width="8"/>
+    </g>
+
+    <!-- Tomato -->
+    <circle cx="80" cy="30" r="50" fill="#EF4444"/>
+    <circle cx="110" cy="10" r="45" fill="#FCA5A5" opacity="0.6"/>
+    <g transform="translate(90, -35)">
+      <line x1="0" y1="0" x2="-15" y2="-20" stroke="#4CAF50" stroke-width="6"/>
+      <line x1="0" y1="0" x2="15" y2="-20" stroke="#4CAF50" stroke-width="6"/>
+    </g>
+
+    <!-- Lettuce -->
+    <g transform="translate(0, 80)">
+      <ellipse cx="-40" cy="0" rx="35" ry="45" fill="#4CAF50"/>
+      <ellipse cx="0" cy="-10" rx="40" ry="50" fill="#66BB6A"/>
+      <ellipse cx="40" cy="0" rx="35" ry="45" fill="#4CAF50"/>
+    </g>
+  </g>
+
+  <!-- Sparkles -->
+  <g fill="#FFFFFF">
+    <circle cx="150" cy="150" r="20"/>
+    <circle cx="850" cy="200" r="16"/>
+    <circle cx="900" cy="800" r="18"/>
+    <circle cx="120" cy="800" r="14"/>
+  </g>
+</svg>

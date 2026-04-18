@@ -18,7 +18,7 @@ struct RecipeAIApp: App {
 
   var body: some Scene {
     WindowGroup {
-      MainTabView()
+      HomeView()
         .modelContainer(modelContainer)
     }
   }
