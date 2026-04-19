@@ -149,13 +149,24 @@ struct HomeView: View {
   private func analyzeFood() {
     guard let image = selectedImage else { return }
     isAnalyzing = true
+    print("🚀 음식 분석 시작...")
 
     Task {
       do {
+        print("📸 선택된 이미지 크기: \(image.size)")
         let recipeResult = try await geminiService.analyzeFood(image: image)
+        print("✅ 분석 완료: \(recipeResult.foodName)")
         self.result = recipeResult
         self.showResult = true
+      } catch let error as NSError {
+        print("❌ 분석 중 오류 발생:")
+        print("   도메인: \(error.domain)")
+        print("   코드: \(error.code)")
+        print("   메시지: \(error.localizedDescription)")
+        errorMessage = error.localizedDescription
+        showError = true
       } catch {
+        print("❌ 예상치 못한 오류: \(error)")
         errorMessage = error.localizedDescription
         showError = true
       }
